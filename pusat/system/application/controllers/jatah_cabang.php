@@ -1,0 +1,145 @@
+<?php
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+*/
+
+class Jatah_cabang extends Controller {
+
+    function index() {
+        $employee = $this->session->userdata('karyawan');
+        if($employee=='') {
+            redirect(base_url().'login');
+        }
+        $data=array();
+        $this->load->model('jatah_cabang_model','jcm');
+        $kantor = $this->jcm->get_kantor();
+        if($kantor!=FALSE) {
+            foreach ($kantor->result() as $row) {
+                $kantor_option[$row->id_kantor] = $row->nama_kantor;
+            }
+        }
+        $data['kantor_combo'] = form_dropdown('jc_id_kantor', $kantor_option);
+        $data['jatah_cabang_list'] = $this->jcm->get_jatah_cabang();
+//pre($this->db->last_query());
+        $templates = $this->load->view('jatah_cabang/search',$data,true);
+        load_templates($templates);
+    }
+    function suggest_barang($kode='') {
+        $employee = $this->session->userdata('karyawan');
+        if($employee=='') {
+            redirect(base_url().'login');
+        }
+        $data=array();
+        $this->load->model('jatah_cabang_model','jcm');
+        $data['barang'] = $this->jcm->get_suggest_barang($kode);
+        $this->load->view('jatah_cabang/suggest_barang',$data);
+    }
+    function search() {
+        $employee = $this->session->userdata('karyawan');
+        if($employee=='') {
+            redirect(base_url().'login');
+        }
+        $this->load->model('jatah_cabang_model','jcm');
+        $jquery_action = $this->input->post('jquery_action');
+        $data=array();
+        $kantor = $this->jcm->get_kantor();
+        if($kantor!=FALSE) {
+            foreach ($kantor->result() as $row) {
+                $kantor_option[$row->id_kantor] = $row->nama_kantor;
+            }
+        }
+        $data['kantor_combo'] = form_dropdown('jc_id_kantor', $kantor_option);
+        if($jquery_action) {
+            $post = bind_form('jc',$_POST);
+            switch ($jquery_action) {
+                case 'search':
+                    $data['jatah_cabang_list'] = $this->jcm->get_jatah_cabang_by_criteria($post);
+//                    pre($this->db->last_query());
+                    break;
+            }
+        }
+        $templates = $this->load->view('jatah_cabang/search',$data,true);
+        load_templates($templates);
+    }
+    function process($action='save',$id='') {
+        $employee = $this->session->userdata('karyawan');
+        if($employee=='') {
+            redirect(base_url().'login');
+        }
+        $data=array();
+        $view='jatah_cabang/form';
+        $this->load->model('jatah_cabang_model','jcm');
+        $kantor = $this->jcm->get_kantor();
+        if($kantor!=FALSE) {
+            foreach ($kantor->result() as $row) {
+               $kantor_option[$row->id_kantor] = $row->nama_kantor;
+            }
+        }
+        $data['kantor_combo'] = form_dropdown('jc_id_kantor', $kantor_option);
+        if($action=='update') {
+            $jatah_cabang = $this->jcm->get_jatah_cabang_by_id($id)->row();
+            $data['kantor_combo'] = form_dropdown('jc_id_kantor', $kantor_option,$jatah_cabang->id_kantor);
+            $data['jatah_cabang'] = $jatah_cabang;
+        }else if($action=='delete') {
+            $data['jatah_cabang'] = $this->jcm->get_jatah_cabang_by_id($id)->row();
+            $view = 'jatah_cabang/delete_form';
+        }
+        $jquery_action = $this->input->post('jquery_action');
+        if($jquery_action) {
+            switch ($jquery_action) {
+                case 'save':
+                    $this->_insert($_POST);
+                    break;
+                case 'update':
+                    $this->_update($_POST);
+                    break;
+                case 'delete':
+                    $this->_delete($_POST);
+                    break;
+            }
+        }
+        $templates = $this->load->view($view,$data,true);
+        load_templates($templates);
+
+    }
+    function _insert($data) {
+        $data = bind_form('jc', $data);
+        $this->load->model('Jatah_cabang_model','jcm');
+        $res = $this->jcm->save($data);
+//        pre($this->db->last_query());
+        if($res) {
+            set_messages('messages_crud','success_save');
+        }else {
+            set_messages('messages_crud','failure_save');
+        }
+        redirect(base_url().'jatah_cabang');
+    }
+
+    function _delete($data) {
+        $this->load->model('Jatah_cabang_model','jcm');
+        $data = bind_form('jc', $data);
+        $res = $this->jcm->delete($data);
+        if($res) {
+            set_messages('messages_crud','success_delete');
+        }else {
+            set_messages('messages_crud','failure_delete');
+        }
+        redirect(base_url().'jatah_cabang');
+
+    }
+
+    function _update($data) {
+        $data = bind_form('jc', $data);
+        $this->load->model('Jatah_cabang_model','jcm');
+        $res = $this->jcm->update($data);
+        if($res) {
+            set_messages('messages_crud','success_update');
+        }else {
+            set_messages('messages_crud','failure_update');
+        }
+        redirect(base_url().'jatah_cabang');
+    }
+}
+
+?>

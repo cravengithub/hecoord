@@ -1,0 +1,76 @@
+<script type="text/javascript">
+    $(function(){
+        $('#btn_submit').click(function(){
+            //            alert('percobaan');
+            $('#main_form').submit();
+        });
+    });
+</script>
+<?php
+$k = isset ($karyawan)?$karyawan:'';
+?>
+<form  id="main_form" name="main_form" method="post">
+    <input type="hidden" name="jquery_action" value="<?php echo isset ($karyawan)?'update':'save'?>"/>
+    <table>
+        <tr>
+            <td>Kode Karyawan</td>
+            <td>:</td>
+            <td><input type="text" id="k_kode_karyawan" name="k_kode_karyawan" value="<?php echo @$k->kode_karyawan?>"/></td>
+        </tr>
+        <tr>
+            <td>Kantor</td>
+            <td>:</td>
+            <td><?php echo isset ($kantor_combo)?$kantor_combo:'';?></td>
+        </tr>
+        <tr>
+            <td>Nama</td>
+            <td>:</td>
+            <td><input type="text" id="k_nama" name="k_nama" value="<?php echo @$k->nama?>"/></td>
+        </tr>
+        <tr>
+            <td>Alamat</td>
+            <td>:</td>
+            <td><textarea id="k_alamat" name="k_alamat" cols="20" rows="4"><?php echo @$k->alamat?></textarea></td>
+        </tr>
+        <tr>
+            <td>Tempat lahir</td>
+            <td>:</td>
+            <td><input type="text" id="k_tempat_lahir" name="k_tempat_lahir" value="<?php echo @$k->tempat_lahir?>"/></td>
+        </tr>
+        <tr>
+            <td>Tanggal lahir</td>
+            <td>:</td>
+            <td><?php echo isset ($tanggal_lahir_combo)?$tanggal_lahir_combo:'';?></td>
+        </tr>
+        <tr>
+            <td>Jenis kelamin</td>
+            <td>:</td>
+            <td><?php echo isset ($jenis_kelamin_combo)?$jenis_kelamin_combo:'';?></td>
+        </tr>
+	<tr>
+            <td>Jabatan</td>
+            <td>:</td>
+            <td><?php echo isset ($jabatan_combo)?$jabatan_combo:'';?></td>
+        </tr>
+        <tr>
+            <td>Agama</td>
+            <td>:</td>
+            <td><?php echo isset ($agama_combo)?$agama_combo:'';?></td>
+        </tr>
+        <tr>
+            <td>Username</td>
+            <td>:</td>
+            <td><input type="text" id="k_username" name="k_username" value="<?php echo @$k->username?>"/></td>
+        </tr>
+        <tr>
+            <td>Password</td>
+            <td>:</td>
+            <td><input type="password" id="k_password" name="k_password" value="<?php echo @$k->password?>"/></td>
+        </tr>
+        <tr>
+            <td><a href="#" class="btn" id="btn_submit" ><?php echo isset ($k->kode_karyawan)?'Perbarui':'Simpan';?></a></td>
+            <td></td>
+            <td><a href="<?php echo base_url()?>karyawan" class="btn" id="btn_cancel" class="">Batal</a></td>
+        </tr>
+    </table>
+</form>

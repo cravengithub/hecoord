@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<definitions xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="urn:barangwsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="urn:barangwsdl">
+<types>
+<xsd:schema targetNamespace="urn:barangwsdl"
+>
+ <xsd:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+ <xsd:import namespace="http://schemas.xmlsoap.org/wsdl/" />
+</xsd:schema>
+</types>
+<message name="get_barangRequest"></message>
+<message name="get_barangResponse"></message>
+<portType name="barangwsdlPortType">
+  <operation name="get_barang">
+    <input message="tns:get_barangRequest"/>
+    <output message="tns:get_barangResponse"/>
+  </operation>
+</portType>
+<binding name="barangwsdlBinding" type="tns:barangwsdlPortType">
+  <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+  <operation name="get_barang">
+    <soap:operation soapAction="http://localhost/content/pusat/client_wsdl/server" style="rpc"/>
+    <input><soap:body use="encoded" namespace="" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></input>
+    <output><soap:body use="encoded" namespace="" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></output>
+  </operation>
+</binding>
+<service name="barangwsdl">
+  <port name="barangwsdlPort" binding="tns:barangwsdlBinding">
+    <soap:address location="http://localhost/content/pusat/client_wsdl/server"/>
+  </port>
+</service>
+</definitions>

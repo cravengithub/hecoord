@@ -1,0 +1,121 @@
+<?php
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+*/
+
+class Barang_ws extends Controller {
+
+    function index() {
+        $employee = $this->session->userdata('karyawan');
+        if($employee=='') {
+            redirect(base_url().'login');
+        }
+        $data=array();
+        $this->load->model('Barang_ws_model','bwm');
+        $kantor = $this->bwm->get_kantor();
+        if($kantor!=FALSE) {
+            foreach ($kantor->result() as $row) {
+                $kantor_option[$row->id_kantor] = $row->nama_kantor;
+            }
+        }
+        $data['kantor_combo'] = form_dropdown('bw_id_kantor', $kantor_option);
+        $data['barang_ws_list'] = $this->bwm->get_barang_ws();
+        $templates = $this->load->view('barang_ws/search',$data,true);
+        load_templates($templates);
+    }
+    function suggest_barang($kode='') {
+        $employee = $this->session->userdata('karyawan');
+        if($employee=='') {
+            redirect(base_url().'login');
+        }
+        $data=array();
+        $this->load->model('barang_ws_model','bwm');
+        $data['barang'] = $this->bwm->get_suggest_barang($kode);
+        $this->load->view('barang_ws/suggest_barang',$data);
+    }
+    function search() {
+        $employee = $this->session->userdata('karyawan');
+        if($employee=='') {
+            redirect(base_url().'login');
+        }
+        $this->load->model('barang_ws_model','bwm');
+        $jquery_action = $this->input->post('jquery_action');
+        $data=array();
+        $kantor = $this->bwm->get_kantor();
+        if($kantor!=FALSE) {
+            foreach ($kantor->result() as $row) {
+                $kantor_option[$row->id_kantor] = $row->nama_kantor;
+            }
+        }
+        $data['kantor_combo'] = form_dropdown('bw_id_kantor', $kantor_option);
+        if($jquery_action) {
+            $post = bind_form('bw',$_POST);
+            switch ($jquery_action) {
+                case 'search':
+                    $data['barang_ws_list'] = $this->bwm->get_barang_ws_by_criteria($post);
+                    break;
+            }
+        }
+        $templates = $this->load->view('barang_ws/search',$data,true);
+        load_templates($templates);
+    }
+    function synchronize($id='') {
+        $employee = $this->session->userdata('karyawan');
+        if($employee=='') {
+            redirect(base_url().'login');
+        }
+        $data=array();
+        $this->load->model('barang_ws_model','bwm');
+        if($id!='') {
+            $row = $this->bwm->get_barang_ws_by_id($id)->row();
+            $par=array('endpoint'=>$row->alamat_wsdl,'wsdl'=>TRUE);
+//            pre($par);
+            $data = array(
+                    'KODE_BARANG'=>$row->kode_barang,
+                    'NAMA_BARANG'=>$row->nama_barang,
+                    'HARGA'=>$row->harga,
+                    'JUMLAH_BARANG'=>$row->limit_atas,
+                    'LIMIT_BAWAH'=>$row->limit_bawah
+            );
+            $this->load->library('nusoap/CI_soap_client',$par);
+            $this->ci_soap_client->call('save_barang',array('data'=>$data));
+            $err =$this->ci_soap_client->getError();
+            if($err) {
+                $this->session->set_flashdata('error',$err);
+            }else {
+                set_messages('synchronize', 'success_synch');
+            }
+        }else {
+            $res = $this->bwm->get_barang_ws_all();
+            if($res) {
+		$par=array('endpoint'=>$res->row()->alamat_wsdl,'wsdl'=>TRUE);
+                $this->load->library('nusoap/CI_soap_client',$par);
+                foreach ($res->result() as $row) {
+                    $data = array(
+                            'KODE_BARANG'=>$row->kode_barang,
+                            'NAMA_BARANG'=>$row->nama_barang,
+                            'HARGA'=>$row->harga,
+                            'JUMLAH_BARANG'=>$row->limit_atas,
+                            'LIMIT_BAWAH'=>$row->limit_bawah
+                    );
+                    $this->ci_soap_client->set_soap_client(array('endpoint'=>$row->alamat_wsdl,'wsdl'=>TRUE));
+                    $this->ci_soap_client->call('save_barang',array('data'=>$data));
+                    $err =$this->ci_soap_client->getError();
+                }
+                if($err) {
+                    $this->session->set_flashdata('error',$err);
+                }else {
+                    set_messages('synchronize', 'success_synch');
+                }
+
+            }
+        }
+        redirect(base_url().'barang_ws');
+
+
+    }
+
+}
+
+?>
